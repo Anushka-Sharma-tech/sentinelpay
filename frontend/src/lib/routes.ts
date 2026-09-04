@@ -1,0 +1,45 @@
+export const routes = {
+  home: "/",
+  about: "/about",
+  pricing: "/pricing",
+  contact: "/contact",
+  howItWorks: "/how-it-works",
+  privacy: "/legal/privacy",
+  terms: "/legal/terms",
+  refunds: "/legal/refunds",
+  shipping: "/legal/shipping",
+  signIn: "/sign-in",
+  signUp: "/sign-up",
+  forgotPassword: "/forgot-password",
+  checkout: "/checkout",
+  dashboard: "/dashboard",
+  liveProtection: "/dashboard/live-protection",
+  investigations: "/dashboard/investigations",
+  riskEvents: "/dashboard/risk-events",
+  testLab: "/dashboard/test-lab",
+  analytics: "/dashboard/analytics",
+  modelLab: "/dashboard/model-lab",
+  dashboardHowItWorks: "/dashboard/how-it-works",
+  settings: "/dashboard/settings",
+  investigation: (id: string) => `/dashboard/investigations/${id}`,
+  riskEvent: (id: string) => `/dashboard/risk-events/${id}`,
+} as const;
+
+export const publicNavigation = [
+  { label: "How it works", href: routes.howItWorks },
+  { label: "About", href: routes.about },
+  { label: "Pricing", href: routes.pricing },
+  { label: "Contact", href: routes.contact },
+] as const;
+
+export const dashboardNavigation = [
+  { label: "Overview", href: routes.dashboard, icon: "overview" },
+  { label: "Live protection", href: routes.liveProtection, icon: "pulse" },
+  { label: "Investigations", href: routes.investigations, icon: "investigation" },
+  { label: "Risk events", href: routes.riskEvents, icon: "shield" },
+  { label: "Test lab", href: routes.testLab, icon: "lab" },
+  { label: "Analytics", href: routes.analytics, icon: "chart" },
+  { label: "Model lab", href: routes.modelLab, icon: "model" },
+  { label: "How it works", href: routes.dashboardHowItWorks, icon: "flow" },
+  { label: "Settings", href: routes.settings, icon: "settings" },
+] as const;
