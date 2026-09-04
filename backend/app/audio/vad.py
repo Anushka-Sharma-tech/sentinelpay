@@ -1,35 +1,33 @@
+from __future__ import annotations
+
 import numpy as np
-import librosa
 
 
-def speech_activity(audio: np.ndarray) -> dict:
-    if audio.size == 0:
-        return {
-            "has_speech": False,
-            "rms": 0.0,
-            "peak": 0.0,
-            "speech_ratio": 0.0,
-        }
+def detect_speech(
+    waveform: np.ndarray,
+    sample_rate: int,
+    frame_ms: int = 30,
+    hop_ms: int = 15,
+    energy_threshold: float = 0.01,
+) -> np.ndarray:
 
-    rms = float(np.sqrt(np.mean(audio ** 2)))
-    peak = float(np.max(np.abs(audio)))
+    frame_length = max(1, int(sample_rate * frame_ms / 1000))
+    hop_length = max(1, int(sample_rate * hop_ms / 1000))
 
-    intervals = librosa.effects.split(audio, top_db=28)
+    if len(waveform) < frame_length:
+        return waveform
 
-    speech_samples = sum(
-        max(0, int(end) - int(start))
-        for start, end in intervals
-    )
+    frames = []
 
-    speech_ratio = speech_samples / len(audio)
+    for start in range(0, len(waveform) - frame_length + 1, hop_length):
+        frame = waveform[start:start + frame_length]
 
-    return {
-        "has_speech": (
-            rms > 0.012
-            and peak > 0.04
-            and speech_ratio > 0.18
-        ),
-        "rms": rms,
-        "peak": peak,
-        "speech_ratio": speech_ratio,
-    }
+        rms = float(np.sqrt(np.mean(frame ** 2)))
+
+        if rms >= energy_threshold:
+            frames.append(frame)
+
+    if not frames:
+        return np.empty(0, dtype=np.float32)
+
+    return np.concatenate(frames).astype(np.float32)
