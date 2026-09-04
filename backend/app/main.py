@@ -4,12 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.risk_analysis import (
     router as risk_analysis_router,
 )
+from app.api.routes.razorpay import (
+    router as razorpay_router,
+)
 
 from app.config import get_settings
 
 
 settings = get_settings()
-
 
 app = FastAPI(
     title="SentinelPay API",
@@ -17,9 +19,8 @@ app = FastAPI(
 )
 
 
-app.include_router(
-    risk_analysis_router
-)
+app.include_router(risk_analysis_router)
+app.include_router(razorpay_router)
 
 
 app.add_middleware(
