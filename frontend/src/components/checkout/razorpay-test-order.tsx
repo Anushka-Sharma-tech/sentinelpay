@@ -47,6 +47,18 @@ export function RazorpayTestOrder() {
       return;
     }
 
+    const sessionId =
+      typeof window !== "undefined"
+        ? window.sessionStorage.getItem("sentinelpay_session_id")
+        : null;
+
+    if (!sessionId) {
+      setMessage(
+        "Run a transaction risk analysis first. Payment orders require the current risk assessment session.",
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -54,6 +66,7 @@ export function RazorpayTestOrder() {
         amount,
         currency: "INR",
         receipt: receipt.trim() || null,
+        session_id: sessionId,
       });
 
       setOrder(createdOrder);
@@ -71,8 +84,8 @@ export function RazorpayTestOrder() {
           <span className="test-mode-mark">Razorpay Test Mode</span>
           <h2>Create a test order</h2>
           <p>
-            This sends order metadata to the FastAPI test endpoint.
-            No card, UPI, or bank details are collected.
+            A current SentinelPay risk assessment is required before an order
+            can be created. No card, UPI, or bank details are collected.
           </p>
         </div>
 
@@ -194,7 +207,7 @@ export function RazorpayTestOrder() {
             <Icon name="shield" width={24} height={24} />
             <p>
               The order ID, paise amount, status, and public test Key ID will
-              appear here.
+              appear here after an allowed risk assessment.
             </p>
           </div>
         )}
