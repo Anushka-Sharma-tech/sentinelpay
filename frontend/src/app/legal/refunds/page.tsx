@@ -15,7 +15,7 @@ export default function RefundsPage() {
           title: "Current position",
           paragraphs: [
             "Because no commercial checkout is connected and no fee is charged for demonstration access, there is currently no purchase to refund.",
-            "The checkout-readiness page does not collect card, bank, UPI, or other payment details.",
+            "The Razorpay Test Mode page creates test orders only and does not collect card, bank, UPI, or other payment details.",
           ],
         },
         {

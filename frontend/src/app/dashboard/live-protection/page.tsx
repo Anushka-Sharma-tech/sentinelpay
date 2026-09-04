@@ -17,15 +17,15 @@ export default function LiveProtectionPage() {
       <PageHeader
         eyebrow="Demonstration stream"
         title="Live Protection"
-        description="The intended path for turning a payment session into a reviewable risk event."
-        actions={<Status level="DEMO">Not connected</Status>}
+        description="The current authenticated path from transaction features to a persisted risk event."
+        actions={<Status level="NEUTRAL">HTTP request flow</Status>}
       />
       <div className="overview-banner">
         <div>
-          <strong>No realtime telemetry is running</strong>
+          <strong>Transaction analysis is connected; streaming is not</strong>
           <p>
-            This view explains the target event-delivery architecture without
-            simulating production traffic.
+            FastAPI creates a Supabase session and risk event for each accepted
+            request. No realtime event feed is mounted.
           </p>
         </div>
       </div>
@@ -43,14 +43,14 @@ export default function LiveProtectionPage() {
         <h2>Connection requirements</h2>
         <div className="prose">
           <p>
-            A production version needs authenticated payment/session input,
-            FastAPI analysis, persisted risk events, and a trusted realtime or
-            event-delivery channel.
+            The mounted transaction endpoint accepts model features, validates
+            a Supabase Bearer token, performs inference, then creates linked
+            session and risk-event records.
           </p>
           <p>
-            The current backend exposes protected audio analysis, while
-            persistence and realtime delivery remain integration boundaries.
-            The interface therefore stays explicitly disconnected.
+            Supabase persistence exists, but no authenticated event-list or
+            realtime-delivery endpoint is mounted. Full history therefore
+            remains a backend-dependent boundary.
           </p>
         </div>
       </section>

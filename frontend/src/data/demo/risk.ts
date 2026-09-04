@@ -9,8 +9,8 @@ export const demoRiskEvents: RiskEvent[] = [
     summary:
       "The conversation combined urgency, bank impersonation language, and a payment request to a new recipient.",
     riskScore: 91,
-    riskLevel: "CRITICAL",
-    decision: "ESCALATE",
+    riskLevel: "HIGH",
+    decision: "BLOCK",
     occurredAt: "Today, 10:42",
     amount: "₹48,500",
     signals: [
@@ -73,7 +73,7 @@ export const demoRiskEvents: RiskEvent[] = [
       "A caller claimed to represent a bank security team and requested a verification code.",
     riskScore: 78,
     riskLevel: "HIGH",
-    decision: "MANUAL_REVIEW",
+    decision: "BLOCK",
     occurredAt: "Today, 09:18",
     amount: "₹12,000",
     signals: [
@@ -129,7 +129,7 @@ export const demoRiskEvents: RiskEvent[] = [
       "A new recipient was added, but the conversation contained no strong manipulation indicators.",
     riskScore: 51,
     riskLevel: "MEDIUM",
-    decision: "STEP_UP_VERIFICATION",
+    decision: "REVIEW",
     occurredAt: "Yesterday, 18:06",
     amount: "₹6,750",
     signals: [
@@ -183,9 +183,9 @@ export const demoInvestigations: Investigation[] = [
   {
     id: "IN-204",
     title: "Urgent payment request",
-    riskLevel: "CRITICAL",
+    riskLevel: "HIGH",
     status: "Open",
-    recommendedAction: "Escalate",
+    recommendedAction: "Block",
     lastActivity: "10 minutes ago",
     eventIds: ["RE-E8A3F"],
     summary:
@@ -194,7 +194,7 @@ export const demoInvestigations: Investigation[] = [
       {
         time: "10:42",
         title: "Risk event created",
-        detail: "The fused score crossed the escalation threshold.",
+        detail: "The score crossed the block threshold.",
       },
       {
         time: "10:42",
@@ -213,7 +213,7 @@ export const demoInvestigations: Investigation[] = [
     title: "Possible bank impersonation",
     riskLevel: "HIGH",
     status: "Reviewing",
-    recommendedAction: "Manual review",
+    recommendedAction: "Block",
     lastActivity: "1 hour ago",
     eventIds: ["RE-72C1A"],
     summary:

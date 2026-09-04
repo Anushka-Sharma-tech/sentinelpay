@@ -19,11 +19,11 @@ export default function AboutPage() {
         </header>
         <div className="fact-grid">
           <div>
-            <span>Implemented pipeline</span>
-            <strong>Under development</strong>
+            <span>Mounted analysis</span>
+            <strong>Transaction model</strong>
             <p>
-              Audio, context, transaction, behaviour, fusion, policy, and
-              explanation modules exist in the current backend.
+              The current protected endpoint scores transaction features,
+              explains factors, and persists linked session and risk-event IDs.
             </p>
           </div>
           <div>
@@ -36,10 +36,10 @@ export default function AboutPage() {
           </div>
           <div>
             <span>Measured evaluation</span>
-            <strong>Not evaluated</strong>
+            <strong>Held-out test reported</strong>
             <p>
-              Precision, recall, false-positive cost, and model calibration must
-              be established on a held-out test set.
+              Repository-backed metrics retain their threshold and cost
+              assumptions rather than implying production performance.
             </p>
           </div>
         </div>
@@ -69,10 +69,10 @@ export default function AboutPage() {
               provide an audit-friendly explanation of the risk decision.
             </p>
             <p>
-              The acoustic component is an audio-classification signal within a
-              larger assessment. SentinelPay does not claim that it is a proven
-              deepfake detector; that requires task-specific evaluation the
-              project has not yet completed.
+              Audio and speech remain part of the broader research direction
+              but are not accepted by the currently mounted transaction
+              endpoint. SentinelPay does not claim to be a proven deepfake
+              detector.
             </p>
           </div>
         </section>
@@ -80,10 +80,9 @@ export default function AboutPage() {
           <h2>Multimodal by design</h2>
           <div className="prose">
             <p>
-              The architecture checks speech presence, acoustic and prosodic
-              characteristics, speaker consistency when a baseline is
-              available, conversation triggers, transaction anomalies, and
-              behavioural patterns.
+              The intended architecture spans speech, conversation,
+              transaction, and behavioural evidence. The current live contract
+              uses transaction and historical activity features.
             </p>
             <p>
               Missing evidence remains visible. If a trusted speaker baseline

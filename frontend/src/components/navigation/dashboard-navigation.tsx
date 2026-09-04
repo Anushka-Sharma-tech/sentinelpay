@@ -40,8 +40,8 @@ export function DashboardSidebar() {
       <div className="sidebar-foot">
         <span className="sidebar-status" />
         <div>
-          <strong>Demo source</strong>
-          <span>No live data connected</span>
+          <strong>Protected API</strong>
+          <span>Test Mode operations</span>
         </div>
       </div>
     </aside>

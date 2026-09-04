@@ -5,9 +5,9 @@ export default function TestLabPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Demonstration data"
-        title="Test Lab"
-        description="Exercise representative scenarios without implying live model inference or measured performance."
+        eyebrow="Authenticated risk analysis"
+        title="Transaction Test Lab"
+        description="Submit the exact transaction features accepted by FastAPI and review the persisted risk decision."
       />
       <TestLab />
     </>

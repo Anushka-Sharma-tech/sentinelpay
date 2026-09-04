@@ -1,27 +1,127 @@
-import type { AnalysisResult } from "@/lib/types/risk";
+import { ApiError, isRecord, postAuthenticated } from "@/lib/api/client";
+import type {
+  AnalysisResult,
+  RiskDecision,
+  RiskFactor,
+  RiskLevel,
+  SignalKey,
+  TransactionAnalysisRequest,
+} from "@/lib/types/risk";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const signalKeys: SignalKey[] = [
+  "acoustic",
+  "prosody",
+  "speaker",
+  "context",
+  "transaction",
+  "behaviour",
+];
 
-export async function analyzeAudio(audio: File, accessToken: string) {
-  if (!apiUrl) {
-    throw new Error("The FastAPI service is not connected in this environment.");
+function isRiskLevel(value: unknown): value is RiskLevel {
+  return value === "LOW" || value === "MEDIUM" || value === "HIGH";
+}
+
+function isRiskDecision(value: unknown): value is RiskDecision {
+  return value === "ALLOW" || value === "REVIEW" || value === "BLOCK";
+}
+
+function isUnitInterval(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 0 &&
+    value <= 1
+  );
+}
+
+function parseFactor(value: unknown): RiskFactor | null {
+  if (
+    !isRecord(value) ||
+    typeof value.name !== "string" ||
+    value.name.length === 0 ||
+    typeof value.category !== "string" ||
+    value.category.length === 0 ||
+    !isUnitInterval(value.contribution) ||
+    typeof value.evidence !== "string" ||
+    value.evidence.length === 0
+  ) {
+    return null;
   }
 
-  const body = new FormData();
-  body.append("audio", audio);
+  return {
+    name: value.name,
+    category: value.category,
+    contribution: value.contribution,
+    evidence: value.evidence,
+  };
+}
 
-  const response = await fetch(`${apiUrl}/api/v1/analyze-audio`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    body,
-  });
-
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      detail?: string;
-    } | null;
-    throw new Error(payload?.detail ?? "Audio analysis failed.");
+export function parseAnalysisResult(value: unknown): AnalysisResult {
+  if (
+    !isRecord(value) ||
+    !isUnitInterval(value.risk_score) ||
+    !isRiskLevel(value.risk_level) ||
+    !isRiskDecision(value.decision) ||
+    !isRecord(value.signals) ||
+    !Array.isArray(value.factors) ||
+    typeof value.model_version !== "string" ||
+    value.model_version.length === 0 ||
+    typeof value.calibrated !== "boolean" ||
+    typeof value.latency_ms !== "number" ||
+    !Number.isFinite(value.latency_ms) ||
+    value.latency_ms < 0 ||
+    typeof value.event_id !== "string" ||
+    value.event_id.length === 0 ||
+    typeof value.session_id !== "string" ||
+    value.session_id.length === 0
+  ) {
+    throw new ApiError(
+      "The backend returned a malformed risk-analysis response.",
+      200,
+    );
   }
 
-  return (await response.json()) as AnalysisResult;
+  const signals = {} as Record<SignalKey, number>;
+
+  for (const key of signalKeys) {
+    const score = value.signals[key];
+    if (!isUnitInterval(score)) {
+      throw new ApiError(
+        "The backend returned malformed signal scores.",
+        200,
+      );
+    }
+    signals[key] = score;
+  }
+
+  const factors = value.factors.map(parseFactor);
+  if (factors.some((factor) => factor === null)) {
+    throw new ApiError("The backend returned malformed risk factors.", 200);
+  }
+
+  return {
+    risk_score: value.risk_score,
+    risk_level: value.risk_level,
+    decision: value.decision,
+    signals,
+    factors: factors.filter((factor): factor is RiskFactor => factor !== null),
+    model_version: value.model_version,
+    calibrated: value.calibrated,
+    latency_ms: value.latency_ms,
+    event_id: value.event_id,
+    session_id: value.session_id,
+  };
+}
+
+export async function analyzeTransaction(
+  request: TransactionAnalysisRequest,
+  accessToken: string,
+) {
+  const payload = await postAuthenticated(
+    "/api/v1/analyze",
+    request,
+    accessToken,
+  );
+
+  return parseAnalysisResult(payload);
 }

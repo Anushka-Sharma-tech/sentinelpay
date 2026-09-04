@@ -25,14 +25,14 @@ export default async function AnalyticsPage() {
       <div className="analytics-layout">
         <section className="panel">
           <div className="panel-header">
-            <h2>Illustrative event volume and escalations</h2>
+            <h2>Illustrative event volume and reviews</h2>
             <span className="demo-label"><span /> Demonstration</span>
           </div>
           <div className="chart" aria-label="Demonstration bar chart">
             {analytics.weeklyActivity.map((item, index) => (
               <div className="chart-column" key={`${item.label}-${index}`}>
                 <span style={{ height: `${item.events}%` }} />
-                <span style={{ height: `${item.escalations}%` }} />
+                <span style={{ height: `${item.reviews}%` }} />
               </div>
             ))}
           </div>
