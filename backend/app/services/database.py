@@ -59,3 +59,22 @@ def save_risk_event(
         raise RuntimeError("Risk event was not persisted.")
 
     return response.data[0]
+
+
+def get_latest_risk_event(session_id: str) -> dict | None:
+    response = (
+        get_supabase_admin()
+        .table("risk_events")
+        .select(
+            "id, risk_score, risk_level, decision, model_version, created_at"
+        )
+        .eq("session_id", session_id)
+        .order("created_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+
+    if not response.data:
+        return None
+
+    return response.data[0]

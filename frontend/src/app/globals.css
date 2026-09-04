@@ -2471,8 +2471,7 @@ select:focus-visible {
 }
 
 .analysis-preset-panel {
-  position: sticky;
-  top: 88px;
+  position: static;
 }
 
 .analysis-contract-note {

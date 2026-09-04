@@ -47,6 +47,18 @@ export function RazorpayTestOrder() {
       return;
     }
 
+    const sessionId =
+      typeof window !== "undefined"
+        ? window.sessionStorage.getItem("sentinelpay_session_id")
+        : null;
+
+    if (!sessionId) {
+      setMessage(
+        "Run a transaction risk analysis first. Payment requires a SentinelPay risk session.",
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -54,6 +66,7 @@ export function RazorpayTestOrder() {
         amount,
         currency: "INR",
         receipt: receipt.trim() || null,
+        session_id: sessionId,
       });
 
       setOrder(createdOrder);

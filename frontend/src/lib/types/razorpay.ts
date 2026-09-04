@@ -2,6 +2,7 @@ export interface RazorpayOrderRequest {
   amount: number;
   currency: "INR";
   receipt: string | null;
+  session_id: string;
 }
 
 export interface RazorpayOrderResult {
