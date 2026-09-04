@@ -1,4 +1,5 @@
-import { ApiError, isRecord, postAuthenticated } from "@/lib/api/client";
+import { ApiError, isRecord, postJson } from "@/lib/api/client";
+
 import type {
   RazorpayOrderRequest,
   RazorpayOrderResult,
@@ -42,12 +43,10 @@ function parseOrderResult(value: unknown): RazorpayOrderResult {
 
 export async function createRazorpayOrder(
   request: RazorpayOrderRequest,
-  accessToken: string,
 ) {
-  const payload = await postAuthenticated(
+  const payload = await postJson(
     "/api/v1/razorpay/orders",
     request,
-    accessToken,
   );
 
   return parseOrderResult(payload);

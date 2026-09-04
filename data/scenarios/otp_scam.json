@@ -1,0 +1,8 @@
+{
+  "id": "otp_scam",
+  "name": "OTP Harvesting",
+  "transcript": "Your account is blocked. Tell me the OTP immediately so I can verify your account and restore access.",
+  "amount_inr": 48000,
+  "is_new_recipient": true,
+  "expected_label": "fraud"
+}

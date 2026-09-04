@@ -1,0 +1,27 @@
+[1mdiff --git a/backend/.python-version b/backend/.python-version[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2c07333[m
+[1m--- /dev/null[m
+[1m+++ b/backend/.python-version[m
+[36m@@ -0,0 +1 @@[m
+[32m+[m[32m3.11[m
+[1mdiff --git a/backend/requirements.txt b/backend/requirements.txt[m
+[1mindex 5fcf7a8..ee23e1e 100644[m
+[1m--- a/backend/requirements.txt[m
+[1m+++ b/backend/requirements.txt[m
+[36m@@ -13,7 +13,7 @@[m [mscikit-learn>=1.7,<2[m
+ joblib>=1.5,<2[m
+ [m
+ supabase>=2,<3[m
+[31m-[m
+[32m+[m[32mrazorpay>=1.4,<2[m
+ python-multipart>=0.0.20,<1[m
+ [m
+ torch==2.8.0[m
+[36m@@ -22,4 +22,4 @@[m [mtransformers==5.16.1[m
+ pytest>=8,<10[m
+ pytest-asyncio>=1,<2[m
+ pydantic-settings>=2.10,<3[m
+[31m-speechbrain>=1.0,<2[m
+\ No newline at end of file[m
+[32m+[m[32mspeechbrain>=1.0,<2[m

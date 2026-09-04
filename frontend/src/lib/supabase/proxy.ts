@@ -1,13 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { routes } from "@/lib/routes";
-
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+  // Supabase is optional in demo mode.
   if (!url || !key) {
     return response;
   }
@@ -15,27 +15,24 @@ export async function updateSession(request: NextRequest) {
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
+
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value),
-        );
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
+
         response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
-        );
+
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
       },
     },
   });
 
-  const { data } = await supabase.auth.getClaims();
-  const isDashboard = request.nextUrl.pathname.startsWith(routes.dashboard);
-
-  if (isDashboard && !data?.claims) {
-    const signInUrl = request.nextUrl.clone();
-    signInUrl.pathname = routes.signIn;
-    signInUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(signInUrl);
-  }
+  // Refresh/maintain an existing Supabase session when one exists.
+  // Authentication is NOT required for demo access.
+  await supabase.auth.getClaims();
 
   return response;
 }

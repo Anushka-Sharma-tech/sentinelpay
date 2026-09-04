@@ -21,8 +21,14 @@ export function getApiUrl() {
   return apiUrl;
 }
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+export function isRecord(
+  value: unknown,
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
 }
 
 export async function postAuthenticated(
@@ -55,6 +61,42 @@ export async function postAuthenticated(
       isRecord(payload) && typeof payload.detail === "string"
         ? payload.detail
         : `The backend returned HTTP ${response.status}.`;
+
+    throw new ApiError(detail, response.status);
+  }
+
+  return payload;
+}
+
+export async function postJson(
+  path: string,
+  body: object,
+) {
+  let response: Response;
+
+  try {
+    response = await fetch(`${getApiUrl()}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(
+      "The backend is unavailable. Check the API URL and that FastAPI is running.",
+      0,
+    );
+  }
+
+  const payload: unknown = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const detail =
+      isRecord(payload) && typeof payload.detail === "string"
+        ? payload.detail
+        : `The backend returned HTTP ${response.status}.`;
+
     throw new ApiError(detail, response.status);
   }
 

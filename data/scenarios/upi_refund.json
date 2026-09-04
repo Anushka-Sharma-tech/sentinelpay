@@ -1,0 +1,8 @@
+{
+  "id": "upi_refund",
+  "name": "Fake UPI Refund",
+  "transcript": "I am calling regarding your UPI refund. Please open the payment app and approve the request so we can send the refund to your account.",
+  "amount_inr": 18000,
+  "is_new_recipient": true,
+  "expected_label": "fraud"
+}

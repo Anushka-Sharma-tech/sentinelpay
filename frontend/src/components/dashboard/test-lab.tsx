@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { AnalysisResultView } from "@/components/dashboard/analysis-result";
@@ -18,8 +17,6 @@ import { Status } from "@/components/ui/status";
 import { saveAnalysis } from "@/lib/analysis-history";
 import { analyzeTransaction } from "@/lib/api/analysis";
 import { ApiError } from "@/lib/api/client";
-import { routes } from "@/lib/routes";
-import { createClient } from "@/lib/supabase/browser";
 import type {
   AnalysisResult,
   TransactionAnalysisRequest,
@@ -30,12 +27,10 @@ function describeApiError(error: unknown) {
     return "Risk analysis failed unexpectedly. Try again.";
   }
 
-  if (error.status === 401 || error.status === 403) {
-    return "Your Supabase session is not authorized. Sign in again and retry.";
-  }
   if (error.status === 400 || error.status === 422) {
     return `The backend rejected the transaction: ${error.message}`;
   }
+
   if (error.status >= 500) {
     return `The backend could not complete the analysis: ${error.message}`;
   }
@@ -46,16 +41,25 @@ function describeApiError(error: unknown) {
 export function TestLab() {
   const [request, setRequest] =
     useState<TransactionAnalysisRequest>(defaultRequest);
+
   const [errors, setErrors] = useState<
     Partial<Record<NumberField, string>>
   >({});
+
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   function setNumber(key: NumberField, value: number) {
-    setRequest((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: undefined }));
+    setRequest((current) => ({
+      ...current,
+      [key]: value,
+    }));
+
+    setErrors((current) => ({
+      ...current,
+      [key]: undefined,
+    }));
   }
 
   function applyPreset(nextRequest: TransactionAnalysisRequest) {
@@ -67,6 +71,7 @@ export function TestLab() {
 
   async function runAnalysis(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     const nextErrors = validateRequest(request);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -79,43 +84,28 @@ export function TestLab() {
     setMessage("");
     setResult(null);
 
-    const supabase = createClient();
-    if (!supabase) {
-      setMessage(
-        "Live analysis requires the public Supabase URL and publishable key.",
-      );
-      setLoading(false);
-      return;
-    }
-
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+      const analysis = await analyzeTransaction(request);
 
-      if (error) {
-        throw new ApiError(
-          "Supabase could not read the current authentication session.",
-          401,
+      saveAnalysis(request, analysis);
+      setResult(analysis);
+
+      // Keep the current risk-analysis session available for the
+      // next payment-gating phase.
+      if (typeof window !== "undefined" && analysis.session_id) {
+        window.sessionStorage.setItem(
+          "sentinelpay_session_id",
+          analysis.session_id,
         );
       }
 
-      if (!session) {
-        setMessage("Sign in before calling the protected analysis endpoint.");
-        return;
-      }
-
-      const analysis = await analyzeTransaction(
-        request,
-        session.access_token,
-      );
-      saveAnalysis(request, analysis);
-      setResult(analysis);
       window.requestAnimationFrame(() =>
         document
           .getElementById("analysis-result")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          }),
       );
     } catch (error) {
       setMessage(describeApiError(error));
@@ -131,6 +121,7 @@ export function TestLab() {
           <h2>Example inputs</h2>
           <Status level="DEMO">Input only</Status>
         </div>
+
         <div className="scenario-list">
           {transactionPresets.map((preset) => (
             <button
@@ -144,13 +135,17 @@ export function TestLab() {
             </button>
           ))}
         </div>
+
         <div className="analysis-contract-note">
           <Icon name="shield" width={18} height={18} />
+
           <div>
-            <strong>Authenticated backend contract</strong>
+            <strong>SentinelPay demo session</strong>
+
             <p>
-              Submissions use your Supabase access token and call{" "}
-              <span className="mono">POST /api/v1/analyze</span>.
+              Analysis runs through{" "}
+              <span className="mono">POST /api/v1/analyze</span>{" "}
+              and creates a persisted session and risk event.
             </p>
           </div>
         </div>
@@ -160,17 +155,21 @@ export function TestLab() {
         <div className="analysis-form-header">
           <div>
             <p className="eyebrow">Live transaction inference</p>
+
             <h2>Analyse a payment</h2>
+
             <p>
               Enter the transaction and history features accepted by the
               current FastAPI request schema.
             </p>
           </div>
-          <Status level="NEUTRAL">Protected API</Status>
+
+          <Status level="DEMO">Demo Session</Status>
         </div>
 
         <fieldset className="analysis-fieldset">
           <legend>Transaction context</legend>
+
           <div className="analysis-field-grid">
             {transactionFields.map((field) => (
               <TransactionField
@@ -186,6 +185,7 @@ export function TestLab() {
 
         <fieldset className="analysis-fieldset">
           <legend>Customer and terminal history</legend>
+
           <div className="analysis-field-grid">
             {historyFields.map((field) => (
               <TransactionField
@@ -210,8 +210,10 @@ export function TestLab() {
               }))
             }
           />
+
           <span>
             <strong>New recipient</strong>
+
             <small>
               Include the backend&apos;s recipient-novelty factor when checked.
             </small>
@@ -225,9 +227,6 @@ export function TestLab() {
             aria-live="polite"
           >
             {message}
-            {message.startsWith("Sign in") && (
-              <Link href={routes.signIn}>Open sign in</Link>
-            )}
           </div>
         )}
 
@@ -240,7 +239,12 @@ export function TestLab() {
           >
             Reset defaults
           </button>
-          <button className="button" type="submit" disabled={loading}>
+
+          <button
+            className="button"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <span className="button-spinner" aria-hidden="true" />

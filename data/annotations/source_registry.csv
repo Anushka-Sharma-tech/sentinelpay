@@ -1,0 +1,4 @@
+source_id,dataset_name,version,modality,task,license,synthetic,provenance_url,notes
+VISHGUARD,VISHGUARD,1.0,audio+text,vishing/social-engineering,CC-BY-4.0,1,https://doi.org/10.1038/s41597-026-07724-z,Synthetic multilingual vishing corpus
+FDH_SIM,Fraud Detection Handbook Simulator,current,transaction,fraud detection,See source repository,1,https://github.com/Fraud-Detection-Handbook/simulated-data-raw,Simulated transaction data
+ASV_DF,ASVspoof 2021 DF,2021,audio,speech spoof/deepfake detection,ODC-By,0,https://www.asvspoof.org/index2021.html,Do not interpret spoof as payment fraud

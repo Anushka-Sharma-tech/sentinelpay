@@ -1,0 +1,8 @@
+{
+  "id": "voice_clone",
+  "name": "Voice Clone Scenario",
+  "transcript": "Hi, this is your account manager. There is an urgent payment issue and I need you to transfer the money to this new account immediately.",
+  "amount_inr": 95000,
+  "is_new_recipient": true,
+  "expected_label": "fraud"
+}

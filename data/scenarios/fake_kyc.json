@@ -1,0 +1,8 @@
+{
+  "id": "fake_kyc",
+  "name": "Fake KYC Threat",
+  "transcript": "Your KYC has expired and your account will be suspended today. Send the verification payment immediately or your account will be blocked.",
+  "amount_inr": 32000,
+  "is_new_recipient": true,
+  "expected_label": "fraud"
+}

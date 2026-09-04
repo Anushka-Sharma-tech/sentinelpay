@@ -1,0 +1,8 @@
+{
+  "id": "fake_bank_officer",
+  "name": "Fake Bank Officer",
+  "transcript": "Hello, I am calling from your bank security department. Your account has suspicious activity and you need to verify your details immediately.",
+  "amount_inr": 75000,
+  "is_new_recipient": true,
+  "expected_label": "fraud"
+}

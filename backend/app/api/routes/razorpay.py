@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import razorpay
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
-from app.dependencies import require_user
 
 
 router = APIRouter(
@@ -23,7 +22,6 @@ class CreateOrderRequest(BaseModel):
 @router.post("/orders")
 async def create_order(
     request: CreateOrderRequest,
-    user=Depends(require_user),
 ):
     settings = get_settings()
 

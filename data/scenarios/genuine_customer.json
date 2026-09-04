@@ -1,0 +1,8 @@
+{
+  "id": "genuine_customer",
+  "name": "Genuine Customer",
+  "transcript": "Hi, I am calling about a payment I made earlier today. I just want to confirm whether it was received successfully.",
+  "amount_inr": 2500,
+  "is_new_recipient": false,
+  "expected_label": "genuine"
+}

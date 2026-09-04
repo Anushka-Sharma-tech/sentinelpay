@@ -1,25 +1,25 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/icon";
 import { ApiError } from "@/lib/api/client";
 import { createRazorpayOrder } from "@/lib/api/razorpay";
-import { routes } from "@/lib/routes";
-import { createClient } from "@/lib/supabase/browser";
 import type { RazorpayOrderResult } from "@/lib/types/razorpay";
 
 function describeOrderError(error: unknown) {
   if (!(error instanceof ApiError)) {
     return "Test order creation failed unexpectedly. Try again.";
   }
-  if (error.status === 401 || error.status === 403) {
-    return "Your Supabase session is not authorized. Sign in again and retry.";
-  }
+
   if (error.status === 400 || error.status === 422) {
     return `The backend rejected the order: ${error.message}`;
   }
+
+  if (error.status === 403) {
+    return error.message;
+  }
+
   if (error.status >= 500) {
     return `The order service could not complete the request: ${error.message}`;
   }
@@ -34,55 +34,29 @@ export function RazorpayTestOrder() {
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<RazorpayOrderResult | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
+
     setMessage("");
     setOrder(null);
 
     if (!Number.isFinite(amount) || amount <= 0) {
-      setMessage("Enter an amount greater than ₹0.");
+      setMessage("Enter a valid payment amount.");
       return;
     }
 
     setLoading(true);
-    const supabase = createClient();
-
-    if (!supabase) {
-      setMessage(
-        "Test order creation requires the public Supabase URL and publishable key.",
-      );
-      setLoading(false);
-      return;
-    }
 
     try {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+      const createdOrder = await createRazorpayOrder({
+        amount,
+        currency: "INR",
+        receipt: receipt.trim() || null,
+      });
 
-      if (error) {
-        throw new ApiError(
-          "Supabase could not read the current authentication session.",
-          401,
-        );
-      }
-
-      if (!session) {
-        setMessage("Sign in before calling the protected Razorpay endpoint.");
-        return;
-      }
-
-      setOrder(
-        await createRazorpayOrder(
-          {
-            amount,
-            currency: "INR",
-            receipt: receipt.trim() || null,
-          },
-          session.access_token,
-        ),
-      );
+      setOrder(createdOrder);
     } catch (error) {
       setMessage(describeOrderError(error));
     } finally {
@@ -97,10 +71,11 @@ export function RazorpayTestOrder() {
           <span className="test-mode-mark">Razorpay Test Mode</span>
           <h2>Create a test order</h2>
           <p>
-            This sends order metadata to the authenticated FastAPI endpoint.
+            This sends order metadata to the FastAPI test endpoint.
             No card, UPI, or bank details are collected.
           </p>
         </div>
+
         <div className="field-row">
           <div className="field">
             <label htmlFor="order-amount">Amount (₹)</label>
@@ -118,6 +93,7 @@ export function RazorpayTestOrder() {
               FastAPI converts rupees to paise before calling Razorpay.
             </span>
           </div>
+
           <div className="field">
             <label htmlFor="order-currency">Currency</label>
             <input id="order-currency" value="INR" readOnly />
@@ -126,6 +102,7 @@ export function RazorpayTestOrder() {
             </span>
           </div>
         </div>
+
         <div className="field">
           <label htmlFor="order-receipt">Receipt reference (optional)</label>
           <input
@@ -146,13 +123,14 @@ export function RazorpayTestOrder() {
             aria-live="polite"
           >
             {message}
-            {message.startsWith("Sign in") && (
-              <Link href={routes.signIn}>Open sign in</Link>
-            )}
           </div>
         )}
 
-        <button className="button" type="submit" disabled={loading}>
+        <button
+          className="button"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? (
             <>
               <span className="button-spinner" aria-hidden="true" />
@@ -169,35 +147,43 @@ export function RazorpayTestOrder() {
 
       <aside className="checkout-summary">
         <span className="test-mode-mark">No payment attempted</span>
+
         <h2>{order ? "Order created" : "Order response"}</h2>
+
         {order ? (
           <>
             <div className="checkout-row">
               <span>Order ID</span>
               <strong className="mono">{order.order_id}</strong>
             </div>
+
             <div className="checkout-row">
               <span>Amount</span>
               <strong>
-                ₹{(order.amount / 100).toLocaleString("en-IN", {
+                ₹
+                {(order.amount / 100).toLocaleString("en-IN", {
                   minimumFractionDigits: 2,
                 })}
               </strong>
             </div>
+
             <div className="checkout-row">
               <span>Currency</span>
               <strong>{order.currency}</strong>
             </div>
+
             <div className="checkout-row">
               <span>Status</span>
               <strong>{order.status}</strong>
             </div>
+
             <div className="checkout-row">
               <span>Test Key ID</span>
               <strong className="mono">
                 {order.key_id.slice(0, 9)}…{order.key_id.slice(-4)}
               </strong>
             </div>
+
             <div className="form-message form-message-success">
               The backend created a Razorpay Test Mode order. Checkout and
               payment verification are not implemented.
@@ -207,8 +193,8 @@ export function RazorpayTestOrder() {
           <div className="checkout-empty">
             <Icon name="shield" width={24} height={24} />
             <p>
-              The authenticated order ID, paise amount, status, and public test
-              Key ID will appear here.
+              The order ID, paise amount, status, and public test Key ID will
+              appear here.
             </p>
           </div>
         )}

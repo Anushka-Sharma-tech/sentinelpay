@@ -1,9 +1,10 @@
-import { ApiError, isRecord, postAuthenticated } from "@/lib/api/client";
+import { ApiError, isRecord, postJson } from "@/lib/api/client";
+
 import type {
   AnalysisResult,
-  RiskDecision,
   RiskFactor,
   RiskLevel,
+  RiskDecision,
   SignalKey,
   TransactionAnalysisRequest,
 } from "@/lib/types/risk";
@@ -85,18 +86,24 @@ export function parseAnalysisResult(value: unknown): AnalysisResult {
 
   for (const key of signalKeys) {
     const score = value.signals[key];
+
     if (!isUnitInterval(score)) {
       throw new ApiError(
         "The backend returned malformed signal scores.",
         200,
       );
     }
+
     signals[key] = score;
   }
 
   const factors = value.factors.map(parseFactor);
+
   if (factors.some((factor) => factor === null)) {
-    throw new ApiError("The backend returned malformed risk factors.", 200);
+    throw new ApiError(
+      "The backend returned malformed risk factors.",
+      200,
+    );
   }
 
   return {
@@ -104,7 +111,9 @@ export function parseAnalysisResult(value: unknown): AnalysisResult {
     risk_level: value.risk_level,
     decision: value.decision,
     signals,
-    factors: factors.filter((factor): factor is RiskFactor => factor !== null),
+    factors: factors.filter(
+      (factor): factor is RiskFactor => factor !== null,
+    ),
     model_version: value.model_version,
     calibrated: value.calibrated,
     latency_ms: value.latency_ms,
@@ -115,13 +124,8 @@ export function parseAnalysisResult(value: unknown): AnalysisResult {
 
 export async function analyzeTransaction(
   request: TransactionAnalysisRequest,
-  accessToken: string,
 ) {
-  const payload = await postAuthenticated(
-    "/api/v1/analyze",
-    request,
-    accessToken,
-  );
+  const payload = await postJson("/api/v1/analyze", request);
 
   return parseAnalysisResult(payload);
 }
