@@ -464,6 +464,10 @@ select:focus-visible {
   padding: 72px 0;
 }
 
+.marketing-hero > * {
+  min-width: 0;
+}
+
 .marketing-hero h1 {
   max-width: 760px;
   margin: 0;
@@ -494,6 +498,8 @@ select:focus-visible {
 
 .hero-proof {
   position: relative;
+  overflow: clip;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -528,6 +534,10 @@ select:focus-visible {
   align-items: center;
   gap: 25px;
   grid-template-columns: 120px 1fr;
+}
+
+.proof-decision > * {
+  min-width: 0;
 }
 
 .proof-decision h2 {
@@ -2188,8 +2198,13 @@ select:focus-visible {
   grid-template-columns: minmax(300px, 0.68fr) minmax(0, 1.32fr);
 }
 
+.lab-layout > * {
+  min-width: 0;
+}
+
 .scenario-list {
   display: grid;
+  max-width: 100%;
 }
 
 .scenario-button {
