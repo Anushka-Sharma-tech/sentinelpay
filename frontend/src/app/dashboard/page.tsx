@@ -14,7 +14,7 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Overview"
         title="Risk operations"
-        description="Run authenticated transaction analysis, then review the score, decision, factors, and persisted identifiers."
+        description="Run transaction-risk analysis, review the score and available evidence, and follow the resulting decision through the payment-defense workflow."
         actions={
           <Link className="button button-small" href={routes.testLab}>
             Analyse transaction
@@ -25,11 +25,12 @@ export default async function DashboardPage() {
         <div>
           <strong>Backend-connected transaction workflow</strong>
           <p>
-            Live analysis and Razorpay order creation require a Supabase
-            session. The event list below remains illustrative.
+            The demonstration analyzes structured transaction and historical
+            context, persists the result in Supabase, and applies the risk
+            decision before the Razorpay Test Mode payment path.
           </p>
         </div>
-        <Status level="NEUTRAL">Protected API</Status>
+        <Status level="DEMO">Demo environment</Status>
       </div>
       <section className="metric-strip" aria-label="Backend contract summary">
         <div className="metric">
@@ -37,14 +38,14 @@ export default async function DashboardPage() {
           <strong style={{ fontFamily: "inherit", fontSize: 16 }}>
             /api/v1/analyze
           </strong>
-          <p>Supabase Bearer authentication</p>
+          <p>Transaction-risk inference</p>
         </div>
         <div className="metric">
           <span>Persistence</span>
           <strong style={{ fontFamily: "inherit", fontSize: 18 }}>
             Event + session
           </strong>
-          <p>IDs returned after Supabase writes</p>
+          <p>Supabase PostgreSQL</p>
         </div>
         <div className="metric">
           <span>Review threshold</span>
@@ -90,16 +91,16 @@ export default async function DashboardPage() {
             <h2>Decision sequence</h2>
           </div>
           <div className="decision-summary">
-            <h3>Evidence before intervention</h3>
+            <h3>Prediction before intervention</h3>
             <p>
-              The console keeps the recommendation connected to the evidence
-              and uncertainty that produced it.
+              The model estimates risk; the policy converts that estimate into
+              an operational action.
             </p>
             <div className="decision-steps">
-              <div><span>01</span><p>Observe bounded multimodal signals.</p></div>
-              <div><span>02</span><p>Fuse signals into a risk score.</p></div>
-              <div><span>03</span><p>Apply a proportionate decision policy.</p></div>
-              <div><span>04</span><p>Explain why and surface what is missing.</p></div>
+              <div><span>01</span><p>Collect structured transaction and history inputs.</p></div>
+              <div><span>02</span><p>Run the trained transaction-risk model.</p></div>
+              <div><span>03</span><p>Apply the ALLOW / REVIEW / BLOCK policy.</p></div>
+              <div><span>04</span><p>Persist the session and risk event for traceability.</p></div>
             </div>
           </div>
         </aside>

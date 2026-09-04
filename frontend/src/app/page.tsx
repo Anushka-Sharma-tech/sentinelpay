@@ -10,33 +10,33 @@ import { routes } from "@/lib/routes";
 const riskDomains = [
   [
     "01",
-    "Voice and speech",
-    "Checks whether speech is present, then extracts acoustic, prosodic, and speaker-consistency signals.",
+    "Transaction intelligence",
+    "Evaluates amount, time, customer history, terminal activity, velocity, and recipient novelty.",
   ],
   [
     "02",
-    "Conversation context",
-    "Looks for social-engineering patterns such as urgency, impersonation, OTP requests, and remote access.",
+    "Risk scoring",
+    "A trained HistGradientBoostingClassifier produces a transaction-risk probability.",
   ],
   [
     "03",
-    "Transaction intelligence",
-    "Considers amount deviation, new recipients, and recent transaction frequency.",
+    "Decision policy",
+    "Converts the model score into LOW / ALLOW, MEDIUM / REVIEW, or HIGH / BLOCK.",
   ],
   [
     "04",
-    "Behavioural signals",
-    "Accounts for retries, failed attempts, and activity compressed into a short time window.",
+    "Explainable evidence",
+    "Shows the supplied risk factors and keeps the model decision distinguishable from certainty of fraud.",
   ],
   [
     "05",
-    "Risk fusion",
-    "Combines bounded signal scores so no single model is presented as unquestionable truth.",
+    "Audit trail",
+    "Persists sessions and risk events in Supabase so each analysis has traceable identifiers.",
   ],
   [
     "06",
-    "Decision policy",
-    "Maps the current transaction score to allow, review, or block.",
+    "Payment defense",
+    "Razorpay Test Mode order creation is gated by the risk decision; REVIEW and BLOCK do not proceed automatically.",
   ],
 ] as const;
 
@@ -49,12 +49,12 @@ export default function HomePage() {
           <div className="marketing-hero-copy">
             <p className="eyebrow">Defensive payment-risk intelligence</p>
             <h1>
-              Voice-assisted fraud leaves <em>more than one signal.</em>
+              Detect transaction risk before <em>payment creation.</em>
             </h1>
             <p>
-              SentinelPay brings speech, conversation, transaction, and
-              behavioural evidence into one explainable risk decision—so an
-              analyst can understand what was flagged and what to do next.
+              SentinelPay evaluates transaction and historical context with a
+              trained machine-learning model, explains the available evidence,
+              persists the decision, and applies an explicit payment-defense policy.
             </p>
             <div className="hero-actions">
               <Link className="button" href={routes.dashboard}>
@@ -66,27 +66,26 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="hero-proof" aria-label="Example explainable risk event">
+          <div className="hero-proof" aria-label="Example transaction risk decision">
             <div className="proof-topline">
-              <Status level="DEMO">Demonstration event</Status>
-              <span className="mono">RE-E8A3F</span>
+              <Status level="DEMO">Demonstration decision</Status>
+              <span className="mono">MODEL V1</span>
             </div>
             <div className="proof-decision">
               <RiskScore score={91} level="HIGH" />
               <div>
                 <Status level="HIGH" />
-                <h2>Urgent payment request</h2>
+                <h2>High transaction risk</h2>
                 <p>
-                  Recommended action: block and verify the payment through a
-                  trusted channel.
+                  Recommended action: block payment creation and require review.
                 </p>
               </div>
             </div>
             <div className="proof-signals">
               {[
-                ["Conversation context", 94],
                 ["Transaction intelligence", 88],
-                ["Behavioural signals", 72],
+                ["Customer / terminal history", 81],
+                ["Decision policy", 91],
               ].map(([label, value]) => (
                 <div className="proof-signal" key={label}>
                   <span>{label}</span>
@@ -103,41 +102,42 @@ export default function HomePage() {
         <section className="section-rule">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Why it matters</p>
-              <h2>Fraud can look like a legitimate payment.</h2>
+              <p className="eyebrow">The problem</p>
+              <h2>A valid payment can still be risky.</h2>
             </div>
             <div>
               <p>
-                In social-engineering fraud, the account holder may authorise
-                the transfer while acting under pressure, deception, or
-                impersonation. Payment data alone can miss the conversation
-                shaping that decision.
+                Payment fraud creates an asymmetric decision problem. Blocking
+                legitimate payments creates friction, while allowing fraudulent
+                transactions can expose the merchant to financial loss. SentinelPay
+                turns available transaction context into a measurable risk score and
+                a bounded operational action.
               </p>
             </div>
           </div>
           <div className="problem-points">
             <div className="problem-point">
-              <span>01 / MANIPULATION</span>
-              <h3>The victim may still approve</h3>
+              <span>01 / DETECT</span>
+              <h3>Estimate transaction risk</h3>
               <p>
-                Conventional controls can see a valid user and valid
-                credentials while missing coercion occurring over voice.
+                Use transaction amount, timing, customer history, terminal activity,
+                and related behavioral context as structured model inputs.
               </p>
             </div>
             <div className="problem-point">
-              <span>02 / CONTEXT</span>
-              <h3>Signals are distributed</h3>
+              <span>02 / EXPLAIN</span>
+              <h3>Make the result inspectable</h3>
               <p>
-                Urgent language, caller claims, new-recipient risk, and unusual
-                retries become more useful when considered together.
+                Surface the factors that can be derived from the supplied input
+                instead of presenting an unexplained probability.
               </p>
             </div>
             <div className="problem-point">
-              <span>03 / DECISION</span>
-              <h3>A score is not an explanation</h3>
+              <span>03 / DEFEND</span>
+              <h3>Gate payment creation</h3>
               <p>
-                Reviewers need the contributing evidence, unavailable context,
-                and a bounded action—not an opaque number.
+                A risk prediction becomes useful only when it is connected to an
+                explicit policy and a downstream payment control.
               </p>
             </div>
           </div>
@@ -146,14 +146,15 @@ export default function HomePage() {
         <section className="section-rule">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Multimodal assessment</p>
-              <h2>How SentinelPay thinks about risk.</h2>
+              <p className="eyebrow">Current implementation</p>
+              <h2>What SentinelPay actually runs today.</h2>
             </div>
             <div>
               <p>
-                The product direction spans six conceptual areas. The mounted
-                API currently scores transaction and historical activity;
-                unavailable voice signals are returned neutrally.
+                The live transaction path is deliberately narrower than the broader
+                research direction. It is a tabular transaction-risk system. No
+                microphone, speech sample, or conversation transcript is used by
+                the current transaction-analysis endpoint.
               </p>
             </div>
           </div>
@@ -173,32 +174,32 @@ export default function HomePage() {
         <section className="section-rule">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Explainability by design</p>
-              <h2>Review the evidence behind a decision.</h2>
+              <p className="eyebrow">Research boundary</p>
+              <h2>Speech data is future-facing, not live fraud evidence.</h2>
             </div>
             <div>
               <p>
-                SentinelPay separates what the pipeline observed, what action
-                it recommends, and what it could not verify. That distinction is
-                essential for defensive, human-reviewed use.
+                TeleAntiFraud and ASVspoof 2021 DF were prepared as auxiliary
+                research foundations. They are not treated as payment-fraud ground
+                truth and do not contribute to the current transaction risk score.
               </p>
             </div>
           </div>
           <div className="explainability-panel">
             <div className="explainability-copy">
-              <h3>Critical risk does not mean certain fraud.</h3>
+              <h3>Prediction is not certainty.</h3>
               <p>
-                It means the available signals crossed a policy threshold and
-                need a proportionate response. Analysts retain context and
-                control.
+                The model estimates risk from the information supplied to it. The
+                policy determines the operational response, and the audit trail
+                records what happened.
               </p>
             </div>
             <div className="explainability-list">
               {[
-                "Why the session was flagged in plain language.",
-                "Which signal families contributed most to the score.",
-                "Which evidence was unavailable or uncertain.",
-                "Which bounded action the decision policy recommends.",
+                "Structured transaction features are evaluated by the trained model.",
+                "The score is mapped to ALLOW, REVIEW, or BLOCK thresholds.",
+                "Supabase stores the session and resulting risk event.",
+                "Razorpay Test Mode is reached only through the payment-defense path.",
               ].map((item, index) => (
                 <div key={item}>
                   <span>0{index + 1}</span>
@@ -210,9 +211,9 @@ export default function HomePage() {
         </section>
 
         <section className="cta-band">
-          <h2>See the full analyst workflow in the demonstration console.</h2>
+          <h2>Run a transaction through the SentinelPay decision pipeline.</h2>
           <Link className="button" href={routes.dashboard}>
-            Explore the console
+            Open the console
             <Icon name="arrow-right" width={16} height={16} />
           </Link>
         </section>
