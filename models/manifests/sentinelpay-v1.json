@@ -1,0 +1,31 @@
+{
+  "model_name": "sentinelpay_risk",
+  "version": "1.0.0",
+  "model_type": "HistGradientBoostingClassifier",
+  "features": [
+    "amount",
+    "hour",
+    "day_of_week",
+    "hour_sin",
+    "hour_cos",
+    "customer_prior_count",
+    "customer_prior_mean",
+    "customer_prior_std",
+    "customer_time_since_previous_sec",
+    "amount_vs_customer_mean",
+    "amount_zscore",
+    "terminal_prior_count",
+    "customer_terminal_prior_count",
+    "TX_TIME_SECONDS",
+    "TX_TIME_DAYS"
+  ],
+  "training_dataset": "sentinelpay-v1",
+  "random_state": 42,
+  "validation_metrics": {
+    "precision": 0.9384010484927916,
+    "recall": 0.3040339702760085,
+    "f1": 0.45926876202694034,
+    "pr_auc": 0.33943495772619214,
+    "roc_auc": 0.6750301138832995
+  }
+}
