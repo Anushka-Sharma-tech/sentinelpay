@@ -1,143 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { FormEvent, useState } from "react";
 
-import { RiskScore } from "@/components/risk/risk-score";
+import { AnalysisResultView } from "@/components/dashboard/analysis-result";
+import {
+  defaultRequest,
+  historyFields,
+  type NumberField,
+  TransactionField,
+  transactionFields,
+  transactionPresets,
+  validateRequest,
+} from "@/components/dashboard/transaction-analysis-fields";
 import { Icon } from "@/components/ui/icon";
 import { Status } from "@/components/ui/status";
-import { demoRiskEvents } from "@/data/demo/risk";
-import { analyzeAudio } from "@/lib/api/analysis";
+import { saveAnalysis } from "@/lib/analysis-history";
+import { analyzeTransaction } from "@/lib/api/analysis";
+import { ApiError } from "@/lib/api/client";
+import { routes } from "@/lib/routes";
 import { createClient } from "@/lib/supabase/browser";
-import type { AnalysisResult } from "@/lib/types/risk";
-import { formatDecision } from "@/lib/utils";
+import type {
+  AnalysisResult,
+  TransactionAnalysisRequest,
+} from "@/lib/types/risk";
 
-type RunState = "idle" | "running" | "complete";
-
-export function TestLab() {
-  const [selected, setSelected] = useState(0);
-  const [state, setState] = useState<RunState>("idle");
-  const event = demoRiskEvents[selected];
-
-  function runScenario() {
-    setState("running");
-    window.setTimeout(() => setState("complete"), 1400);
+function describeApiError(error: unknown) {
+  if (!(error instanceof ApiError)) {
+    return "Risk analysis failed unexpectedly. Try again.";
   }
 
-  return (
-    <>
-      <div className="lab-layout">
-        <section className="panel">
-        <div className="panel-header">
-          <h2>Demonstration scenarios</h2>
-        </div>
-        <div className="scenario-list">
-          {demoRiskEvents.map((scenario, index) => (
-            <button
-              className={`scenario-button ${selected === index ? "scenario-button-active" : ""}`}
-              key={scenario.id}
-              type="button"
-              onClick={() => {
-                setSelected(index);
-                setState("idle");
-              }}
-            >
-              <strong>{scenario.title}</strong>
-              <span>{scenario.summary}</span>
-            </button>
-          ))}
-        </div>
-        </section>
-        <section className="lab-workspace">
-        <div className="lab-workspace-header">
-          <strong>Scenario workspace</strong>
-          <Status level="DEMO">Demo data</Status>
-        </div>
-        <div className="lab-workspace-body">
-          {state === "idle" && (
-            <div className="lab-empty">
-              <span className="lab-empty-icon">
-                <Icon name="lab" width={24} height={24} />
-              </span>
-              <h2>{event.title}</h2>
-              <p>
-                Run this bounded scenario to preview how the decision,
-                contributing reasons, and limitations are presented.
-              </p>
-              <button className="button" type="button" onClick={runScenario}>
-                Run scenario
-                <Icon name="arrow-right" width={16} height={16} />
-              </button>
-            </div>
-          )}
-          {state === "running" && (
-            <div className="lab-running" role="status">
-              <span className="lab-running-icon">
-                <Icon name="pulse" width={24} height={24} />
-              </span>
-              <h2>Assembling risk evidence</h2>
-              <p>
-                Combining demonstration context, transaction, behaviour, and
-                audio signals.
-              </p>
-              <div className="lab-progress"><span /></div>
-            </div>
-          )}
-          {state === "complete" && (
-            <div className="lab-result">
-              <div className="lab-result-summary">
-                <RiskScore score={event.riskScore} level={event.riskLevel} />
-                <div>
-                  <Status level={event.riskLevel} />
-                  <h2>{event.title}</h2>
-                  <p>
-                    Recommended action: {formatDecision(event.decision)}. This
-                    result is pre-authored demonstration data, not a live model
-                    inference.
-                  </p>
-                </div>
-              </div>
-              <div className="lab-result-reasons">
-                {event.signals.slice(0, 3).map((signal) => (
-                  <div key={signal.key}>
-                    <span>{signal.summary}</span>
-                    <strong>
-                      {signal.score === null
-                        ? "N/A"
-                        : Math.round(signal.score * 100)}
-                    </strong>
-                  </div>
-                ))}
-              </div>
-              <div className="lab-result-actions">
-                <button className="button" type="button" onClick={runScenario}>
-                  Run again
-                </button>
-                <button
-                  className="button button-secondary"
-                  type="button"
-                  onClick={() => setState("idle")}
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        </section>
-      </div>
-      <AudioAnalysisPanel />
-    </>
-  );
+  if (error.status === 401 || error.status === 403) {
+    return "Your Supabase session is not authorized. Sign in again and retry.";
+  }
+  if (error.status === 400 || error.status === 422) {
+    return `The backend rejected the transaction: ${error.message}`;
+  }
+  if (error.status >= 500) {
+    return `The backend could not complete the analysis: ${error.message}`;
+  }
+
+  return error.message;
 }
 
-function AudioAnalysisPanel() {
-  const [file, setFile] = useState<File | null>(null);
+export function TestLab() {
+  const [request, setRequest] =
+    useState<TransactionAnalysisRequest>(defaultRequest);
+  const [errors, setErrors] = useState<
+    Partial<Record<NumberField, string>>
+  >({});
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function runAnalysis() {
-    if (!file) return;
+  function setNumber(key: NumberField, value: number) {
+    setRequest((current) => ({ ...current, [key]: value }));
+    setErrors((current) => ({ ...current, [key]: undefined }));
+  }
+
+  function applyPreset(nextRequest: TransactionAnalysisRequest) {
+    setRequest({ ...nextRequest });
+    setErrors({});
+    setMessage("");
+    setResult(null);
+  }
+
+  async function runAnalysis(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextErrors = validateRequest(request);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      setMessage("Correct the highlighted fields before submitting.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
     setResult(null);
@@ -145,84 +82,181 @@ function AudioAnalysisPanel() {
     const supabase = createClient();
     if (!supabase) {
       setMessage(
-        "Real analysis requires Supabase authentication and the FastAPI service. Demonstration scenarios remain available above.",
+        "Live analysis requires the public Supabase URL and publishable key.",
       );
-      setLoading(false);
-      return;
-    }
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setMessage("Sign in before sending audio to the protected analysis API.");
       setLoading(false);
       return;
     }
 
     try {
-      setResult(await analyzeAudio(file, session.access_token));
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Audio analysis failed.",
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) {
+        throw new ApiError(
+          "Supabase could not read the current authentication session.",
+          401,
+        );
+      }
+
+      if (!session) {
+        setMessage("Sign in before calling the protected analysis endpoint.");
+        return;
+      }
+
+      const analysis = await analyzeTransaction(
+        request,
+        session.access_token,
       );
+      saveAnalysis(request, analysis);
+      setResult(analysis);
+      window.requestAnimationFrame(() =>
+        document
+          .getElementById("analysis-result")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    } catch (error) {
+      setMessage(describeApiError(error));
     } finally {
       setLoading(false);
     }
   }
 
-  const score = result
-    ? Math.round(result.risk_score <= 1 ? result.risk_score * 100 : result.risk_score)
-    : 0;
-
   return (
-    <section className="analysis-upload">
-      <div>
-        <p className="eyebrow">Connected analysis</p>
-        <h2>Analyse an authenticated audio sample</h2>
-        <p>
-          Sends only the selected file to the configured FastAPI endpoint. The
-          backend accepts a maximum of 2 MB.
-        </p>
-      </div>
-      <div className="analysis-upload-control">
-        <label className="file-trigger">
-          Choose audio file
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null);
-              setResult(null);
-              setMessage("");
-            }}
-          />
-        </label>
-        <span>{file ? file.name : "No file selected"}</span>
-        <button
-          className="button button-small"
-          type="button"
-          disabled={!file || loading}
-          onClick={runAnalysis}
-        >
-          {loading ? "Analysing…" : "Analyse audio"}
-        </button>
-      </div>
-      {message && <div className="form-message" role="status">{message}</div>}
-      {result && (
-        <div className="analysis-result">
-          <RiskScore score={score} level={result.risk_level} compact />
-          <div>
-            <Status level={result.risk_level} />
-            <h3>{formatDecision(result.decision)}</h3>
-            <p>{result.explanations.join(" ")}</p>
-          </div>
-          <dl className="metadata-list">
-            <div><dt>Model</dt><dd>{result.model_version}</dd></div>
-            <div><dt>Latency</dt><dd>{result.latency_ms} ms</dd></div>
-          </dl>
+    <div className="transaction-lab">
+      <aside className="analysis-preset-panel">
+        <div className="panel-header">
+          <h2>Example inputs</h2>
+          <Status level="DEMO">Input only</Status>
         </div>
-      )}
-    </section>
+        <div className="scenario-list">
+          {transactionPresets.map((preset) => (
+            <button
+              className="scenario-button"
+              key={preset.label}
+              type="button"
+              onClick={() => applyPreset(preset.request)}
+            >
+              <strong>{preset.label}</strong>
+              <span>{preset.description}</span>
+            </button>
+          ))}
+        </div>
+        <div className="analysis-contract-note">
+          <Icon name="shield" width={18} height={18} />
+          <div>
+            <strong>Authenticated backend contract</strong>
+            <p>
+              Submissions use your Supabase access token and call{" "}
+              <span className="mono">POST /api/v1/analyze</span>.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      <form className="analysis-form-panel" onSubmit={runAnalysis}>
+        <div className="analysis-form-header">
+          <div>
+            <p className="eyebrow">Live transaction inference</p>
+            <h2>Analyse a payment</h2>
+            <p>
+              Enter the transaction and history features accepted by the
+              current FastAPI request schema.
+            </p>
+          </div>
+          <Status level="NEUTRAL">Protected API</Status>
+        </div>
+
+        <fieldset className="analysis-fieldset">
+          <legend>Transaction context</legend>
+          <div className="analysis-field-grid">
+            {transactionFields.map((field) => (
+              <TransactionField
+                definition={field}
+                error={errors[field.key]}
+                key={field.key}
+                value={request[field.key]}
+                onChange={(value) => setNumber(field.key, value)}
+              />
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="analysis-fieldset">
+          <legend>Customer and terminal history</legend>
+          <div className="analysis-field-grid">
+            {historyFields.map((field) => (
+              <TransactionField
+                definition={field}
+                error={errors[field.key]}
+                key={field.key}
+                value={request[field.key]}
+                onChange={(value) => setNumber(field.key, value)}
+              />
+            ))}
+          </div>
+        </fieldset>
+
+        <label className="analysis-checkbox">
+          <input
+            type="checkbox"
+            checked={request.is_new_recipient}
+            onChange={(event) =>
+              setRequest((current) => ({
+                ...current,
+                is_new_recipient: event.target.checked,
+              }))
+            }
+          />
+          <span>
+            <strong>New recipient</strong>
+            <small>
+              Include the backend&apos;s recipient-novelty factor when checked.
+            </small>
+          </span>
+        </label>
+
+        {message && (
+          <div
+            className="form-message form-message-error"
+            role="alert"
+            aria-live="polite"
+          >
+            {message}
+            {message.startsWith("Sign in") && (
+              <Link href={routes.signIn}>Open sign in</Link>
+            )}
+          </div>
+        )}
+
+        <div className="analysis-form-actions">
+          <button
+            className="button button-secondary"
+            type="button"
+            disabled={loading}
+            onClick={() => applyPreset(defaultRequest)}
+          >
+            Reset defaults
+          </button>
+          <button className="button" type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <span className="button-spinner" aria-hidden="true" />
+                Running inference…
+              </>
+            ) : (
+              <>
+                Analyse transaction
+                <Icon name="arrow-right" width={16} height={16} />
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
+      {result && <AnalysisResultView result={result} />}
+    </div>
   );
 }

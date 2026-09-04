@@ -5,18 +5,12 @@ import { MarketingLayout } from "@/components/layout/marketing-layout";
 export const metadata: Metadata = { title: "How it works" };
 
 const stages = [
-  ["Audio", "Receives a short voice sample through the protected analysis API."],
-  ["Voice activity detection", "Checks whether the sample contains enough meaningful speech to analyse."],
-  ["Acoustic analysis", "Produces a bounded audio-classification signal; it is not treated as proof."],
-  ["Prosody analysis", "Examines pitch variation and speech dynamics that may add context."],
-  ["Speaker consistency", "Compares speaker embeddings only when a trusted baseline is available."],
-  ["Transcription", "Converts speech into text for conversation analysis."],
-  ["Conversation analysis", "Looks for urgency, impersonation, OTP requests, payment pressure, and remote access."],
-  ["Transaction intelligence", "Considers amount deviation, new recipients, and recent payment frequency."],
-  ["Behaviour intelligence", "Considers retries, failures, and compressed activity over time."],
-  ["Risk fusion", "Weights the six signal families into a bounded combined assessment."],
-  ["Decision policy", "Maps risk to allow, step-up verification, manual review, or escalation."],
-  ["Explanation", "Returns the reasons, supporting signals, limitations, and technical metadata."],
+  ["Authenticate", "Validates the browser's Supabase access token before accepting a protected request."],
+  ["Validate", "Checks the transaction, customer-history, and terminal-history fields against the FastAPI schema."],
+  ["Analyse", "Runs the HistGradientBoostingClassifier and produces a probability from zero to one."],
+  ["Decide", "Maps the probability to LOW, MEDIUM, or HIGH and ALLOW, REVIEW, or BLOCK."],
+  ["Persist", "Creates a Supabase session and stores a linked risk-event record."],
+  ["Explain", "Returns factors, six signal fields, model metadata, latency, event ID, and session ID."],
 ] as const;
 
 export default function HowItWorksPage() {
@@ -25,10 +19,11 @@ export default function HowItWorksPage() {
       <div className="marketing-page">
         <header className="marketing-title">
           <p className="eyebrow">How it works</p>
-          <h1>From a voice sample to an explainable action.</h1>
+          <h1>From transaction context to a persisted decision.</h1>
           <p>
-            SentinelPay follows a staged pipeline. Each stage contributes a
-            specific type of evidence and passes a bounded result forward.
+            This is the path exposed by the currently mounted backend API.
+            Audio and speech modalities remain a product direction, not part of
+            the live transaction request.
           </p>
         </header>
         <div className="pipeline">

@@ -2,61 +2,65 @@ import Link from "next/link";
 
 import { PageHeader } from "@/components/ui/page-header";
 import { Status } from "@/components/ui/status";
-import { getInvestigations, getRiskEvents } from "@/lib/adapters/risk";
+import { getRiskEvents } from "@/lib/adapters/risk";
 import { routes } from "@/lib/routes";
 import { formatDecision } from "@/lib/utils";
 
 export default async function DashboardPage() {
-  const [events, investigations] = await Promise.all([
-    getRiskEvents(),
-    getInvestigations(),
-  ]);
+  const events = await getRiskEvents();
 
   return (
     <>
       <PageHeader
         eyebrow="Overview"
         title="Risk operations"
-        description="Understand what is happening, why it was flagged, and which action needs attention."
+        description="Run authenticated transaction analysis, then review the score, decision, factors, and persisted identifiers."
+        actions={
+          <Link className="button button-small" href={routes.testLab}>
+            Analyse transaction
+          </Link>
+        }
       />
       <div className="overview-banner">
         <div>
-          <strong>Demonstration environment</strong>
+          <strong>Backend-connected transaction workflow</strong>
           <p>
-            These events are illustrative. No live payment or voice stream is
-            connected.
+            Live analysis and Razorpay order creation require a Supabase
+            session. The event list below remains illustrative.
           </p>
         </div>
-        <Status level="DEMO">Demo data</Status>
+        <Status level="NEUTRAL">Protected API</Status>
       </div>
-      <section className="metric-strip" aria-label="Demonstration summary">
+      <section className="metric-strip" aria-label="Backend contract summary">
         <div className="metric">
-          <span>Demonstration events</span>
-          <strong>{events.length}</strong>
-          <p>Illustrative records only</p>
-        </div>
-        <div className="metric">
-          <span>Open investigations</span>
-          <strong>{investigations.length}</strong>
-          <p>Demonstration workflow</p>
-        </div>
-        <div className="metric">
-          <span>Highest risk</span>
-          <strong>91</strong>
-          <p>Example score, not performance</p>
-        </div>
-        <div className="metric">
-          <span>Model evaluation</span>
-          <strong style={{ fontFamily: "inherit", fontSize: 18 }}>
-            Not evaluated
+          <span>Analysis endpoint</span>
+          <strong style={{ fontFamily: "inherit", fontSize: 16 }}>
+            /api/v1/analyze
           </strong>
-          <p>No precision or recall claimed</p>
+          <p>Supabase Bearer authentication</p>
+        </div>
+        <div className="metric">
+          <span>Persistence</span>
+          <strong style={{ fontFamily: "inherit", fontSize: 18 }}>
+            Event + session
+          </strong>
+          <p>IDs returned after Supabase writes</p>
+        </div>
+        <div className="metric">
+          <span>Review threshold</span>
+          <strong>25</strong>
+          <p>Validation-selected operating point</p>
+        </div>
+        <div className="metric">
+          <span>Block threshold</span>
+          <strong>60</strong>
+          <p>Conservative operational policy</p>
         </div>
       </section>
       <div className="dashboard-grid">
         <section className="panel">
           <div className="panel-header">
-            <h2>Risk events requiring context</h2>
+            <h2>Illustrative risk events</h2>
             <Link href={routes.riskEvents}>View all</Link>
           </div>
           <div className="data-list">

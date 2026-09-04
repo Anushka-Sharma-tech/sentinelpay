@@ -17,12 +17,12 @@ export function AuthShell({
           <p className="eyebrow">SentinelPay console</p>
           <h1>Understand the risk before acting on it.</h1>
           <p>
-            Review voice, context, transaction, and behavioural evidence in one
-            defensive investigation workspace.
+            Review transaction features, contributing factors, and persisted
+            event metadata in one explainable risk workflow.
           </p>
         </div>
         <span className="auth-aside-foot">
-          Under development · No live payment data connected
+          Under development · Razorpay Test Mode only
         </span>
       </aside>
       <main className="auth-main">

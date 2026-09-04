@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { RecentAnalyses } from "@/components/dashboard/recent-analyses";
 import { PageHeader } from "@/components/ui/page-header";
 import { Status } from "@/components/ui/status";
 import { getRiskEvents } from "@/lib/adapters/risk";
@@ -12,11 +13,21 @@ export default async function RiskEventsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Demonstration events"
+        eyebrow="Risk event review"
         title="Risk events"
-        description="Human-readable decisions with supporting signal context and explicit uncertainty."
-        actions={<Status level="DEMO">Demo data</Status>}
+        description="Review event IDs returned by live analysis separately from illustrative investigation records."
       />
+      <RecentAnalyses />
+      <div className="risk-events-divider">
+        <div>
+          <h2>Illustrative investigation records</h2>
+          <p>
+            These examples remain frontend demonstration data and are not read
+            from Supabase.
+          </p>
+        </div>
+        <Status level="DEMO">Demo data</Status>
+      </div>
       <div className="table-wrap">
         <table className="data-table">
           <thead>

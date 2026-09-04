@@ -22,7 +22,7 @@ export default function TermsPage() {
           title: "Risk decisions",
           paragraphs: [
             "A risk score is a model output, not proof that fraud occurred. Decisions should be reviewed with relevant evidence, policy, and human judgement.",
-            "The project has not yet published measured precision, recall, false-positive cost, or production reliability. Do not represent its demonstration data as validated performance.",
+            "The repository includes held-out model metrics and an assumed false-positive cost model. They are not production reliability, merchant economics, or a guarantee of future performance.",
           ],
         },
         {

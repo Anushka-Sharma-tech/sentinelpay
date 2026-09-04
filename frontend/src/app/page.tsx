@@ -36,7 +36,7 @@ const riskDomains = [
   [
     "06",
     "Decision policy",
-    "Maps the fused assessment to allow, step-up verification, manual review, or escalation.",
+    "Maps the current transaction score to allow, review, or block.",
   ],
 ] as const;
 
@@ -72,12 +72,12 @@ export default function HomePage() {
               <span className="mono">RE-E8A3F</span>
             </div>
             <div className="proof-decision">
-              <RiskScore score={91} level="CRITICAL" />
+              <RiskScore score={91} level="HIGH" />
               <div>
-                <Status level="CRITICAL" />
+                <Status level="HIGH" />
                 <h2>Urgent payment request</h2>
                 <p>
-                  Recommended action: escalate and verify the payment through a
+                  Recommended action: block and verify the payment through a
                   trusted channel.
                 </p>
               </div>
@@ -151,9 +151,9 @@ export default function HomePage() {
             </div>
             <div>
               <p>
-                The current pipeline combines six conceptual areas reflected in
-                the backend. Each contributes evidence and retains its own
-                limitations.
+                The product direction spans six conceptual areas. The mounted
+                API currently scores transaction and historical activity;
+                unavailable voice signals are returned neutrally.
               </p>
             </div>
           </div>

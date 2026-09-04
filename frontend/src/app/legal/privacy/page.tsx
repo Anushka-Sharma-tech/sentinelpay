@@ -22,7 +22,8 @@ export default function PrivacyPage() {
           title: "Connected services",
           paragraphs: [
             "When Supabase is configured, account information such as email, display name, verification state, and an avatar reference may be processed by that service. Profile images should be stored in user-scoped storage rather than embedded as large authentication metadata.",
-            "When the FastAPI analysis service is connected, audio selected by an authenticated user is sent to that configured service for analysis. SentinelPay should not forward sensitive audio to arbitrary third parties.",
+            "When the FastAPI service is connected, authenticated transaction and history features are sent to the configured analysis endpoint. Successful responses include identifiers for the session and risk event persisted by the backend.",
+            "The currently mounted transaction endpoint does not accept audio. Any future voice-data processing requires a separately reviewed privacy and consent boundary.",
           ],
         },
         {
