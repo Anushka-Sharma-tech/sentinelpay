@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
+from app.services.database import get_latest_risk_event
 
 
 router = APIRouter(
@@ -17,12 +18,30 @@ class CreateOrderRequest(BaseModel):
     amount: float = Field(gt=0)
     currency: str = "INR"
     receipt: str | None = None
+    session_id: str
 
 
 @router.post("/orders")
 async def create_order(
     request: CreateOrderRequest,
 ):
+    risk_event = get_latest_risk_event(request.session_id)
+
+    if not risk_event:
+        raise HTTPException(
+            status_code=403,
+            detail="Payment requires a current risk assessment for this session.",
+        )
+
+    if risk_event["decision"] != "ALLOW":
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"Payment blocked by SentinelPay risk policy: "
+                f"{risk_event['risk_level']} / {risk_event['decision']}."
+            ),
+        )
+
     settings = get_settings()
 
     if not settings.razorpay_key_id or not settings.razorpay_key_secret:
@@ -48,6 +67,8 @@ async def create_order(
             "notes": {
                 "source": "sentinelpay",
                 "environment": settings.app_env,
+                "session_id": request.session_id,
+                "risk_event_id": risk_event["id"],
             },
         }
 
@@ -61,6 +82,8 @@ async def create_order(
             "key_id": settings.razorpay_key_id,
         }
 
+    except HTTPException:
+        raise
     except Exception as exc:
         print(f"Razorpay order creation error: {exc}")
 
