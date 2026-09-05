@@ -411,7 +411,6 @@ select:focus-visible {
   overflow: hidden;
   place-items: center;
   background: var(--ink);
-  animation: introIn 450ms ease both;
 }
 
 .intro-grid {
@@ -3842,3 +3841,4 @@ select:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+

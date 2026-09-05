@@ -22,6 +22,7 @@ export default async function DashboardLayout({
       demoMode={!hasSupabaseConfig}
     >
       {children}
+
       <style>{`
         .transaction-lab {
           position: relative;
@@ -37,15 +38,9 @@ export default async function DashboardLayout({
         }
 
         .analysis-preset-panel {
-          position: sticky;
-          top: 88px;
+          position: static;
           align-self: start;
           min-height: 0;
-          max-height: calc(100vh - 112px);
-          overflow-x: hidden;
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          scrollbar-gutter: stable;
         }
 
         @media (max-width: 1100px) {
@@ -61,8 +56,7 @@ export default async function DashboardLayout({
 
           .analysis-preset-panel {
             position: static;
-            max-height: none;
-            overflow: visible;
+            min-height: 0;
           }
         }
       `}</style>
