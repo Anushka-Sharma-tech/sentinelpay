@@ -87,7 +87,6 @@ async def create_order(
 
     except Exception as exc:
         print(f"Razorpay order creation error: {exc}")
-
         raise HTTPException(
             status_code=502,
             detail="Razorpay order creation failed.",
