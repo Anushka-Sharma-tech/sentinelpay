@@ -1,69 +1,141 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 import { RiskScore } from "@/components/risk/risk-score";
 import { Status } from "@/components/ui/status";
 import { routes } from "@/lib/routes";
-import type { AnalysisResult } from "@/lib/types/risk";
+import type { AnalysisResult, RiskFactor } from "@/lib/types/risk";
 import { formatDecision } from "@/lib/utils";
 
-const evidenceCopy = [
-  ["Transaction amount", "Compared with the supplied customer history."],
-  ["Transaction timing", "Hour, day and dataset-relative transaction time."],
-  ["Customer history", "Prior count, historical mean and standard deviation."],
-  ["Terminal activity", "Prior terminal and customer-terminal activity."],
-  ["Recipient novelty", "Whether the supplied transaction uses a new recipient."],
-] as const;
+function formatFactorName(name: string) {
+  const labels: Record<string, string> = {
+    amount_deviation: "Unusual transaction amount",
+    transaction_velocity: "Transaction activity",
+    new_customer_history: "Limited customer history",
+    new_recipient: "New recipient",
+    model_assessment: "Overall model assessment",
+  };
+
+  return (
+    labels[name] ??
+    name
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (character) => character.toUpperCase())
+  );
+}
+
+function formatFactorCategory(category: string) {
+  if (category === "transaction") return "Transaction signal";
+  if (category === "behaviour") return "Behaviour signal";
+  return "Model signal";
+}
+
+function formatContribution(contribution: number) {
+  return `${Math.round(contribution * 100)}%`;
+}
+
+function FactorItem({ factor }: { factor: RiskFactor }) {
+  return (
+    <article className="factor-item">
+      <div className="factor-item-main">
+        <div className="factor-item-heading">
+          <div>
+            <span>{formatFactorCategory(factor.category)}</span>
+            <strong>{formatFactorName(factor.name)}</strong>
+          </div>
+          <b>{formatContribution(factor.contribution)}</b>
+        </div>
+        <p>{factor.evidence}</p>
+      </div>
+    </article>
+  );
+}
 
 export function AnalysisResultView({ result }: { result: AnalysisResult }) {
   const score = Math.round(result.risk_score * 100);
+  const decisionLabel = formatDecision(result.decision);
 
   return (
     <section className="analysis-live-result" id="analysis-result">
       <div className="analysis-result-hero">
         <RiskScore score={score} level={result.risk_level} />
-        <div>
+
+        <div className="analysis-result-hero-copy">
           <div className="analysis-result-statuses">
             <Status level={result.risk_level} />
             <span className={`decision decision-${result.decision.toLowerCase()}`}>
-              {formatDecision(result.decision)}
+              {decisionLabel}
             </span>
           </div>
-          <h2>{formatDecision(result.decision)} recommended</h2>
+
+          <h2>{decisionLabel} recommended</h2>
+
           <p>
-            The transaction model produced this risk score. FastAPI persisted
-            the assessment as risk event <span className="mono">{result.event_id}</span>{" "}
-            in session <span className="mono">{result.session_id}</span>.
+            SentinelPay evaluated the submitted transaction with the current
+            transaction-risk model and produced this recommendation.
           </p>
+
+          <div className="analysis-result-next-step">
+            <span>Payment outcome</span>
+            <strong>
+              {result.decision === "ALLOW"
+                ? "Payment can proceed."
+                : result.decision === "REVIEW"
+                  ? "Payment requires review before proceeding."
+                  : "Payment is blocked by the current risk policy."}
+            </strong>
+          </div>
         </div>
       </div>
 
       <div className="analysis-result-grid">
-        <section className="detail-section">
-          <h3>Evidence used by the current model</h3>
-          <div className="factor-list">
-            {evidenceCopy.map(([title, description]) => (
-              <article className="factor-item" key={title}>
-                <div>
-                  <span>Available input</span>
-                  <strong>{title}</strong>
-                  <p>{description}</p>
-                </div>
-              </article>
-            ))}
+        <section className="detail-section analysis-evidence-panel">
+          <div className="analysis-section-intro">
+            <span className="analysis-section-kicker">Why this result</span>
+            <h3>Signals behind the recommendation</h3>
+            <p>
+              These are the strongest explanatory factors returned for this
+              transaction. They help show what the model considered unusual or
+              important.
+            </p>
           </div>
-          <div className="form-message" style={{ marginTop: 20 }}>
-            The current live endpoint does not accept audio or conversation
-            text. Speech datasets prepared in the project are auxiliary
-            research material and do not contribute to this transaction score.
+
+          {result.factors.length > 0 ? (
+            <div className="factor-list">
+              {result.factors.map((factor) => (
+                <FactorItem factor={factor} key={`${factor.category}-${factor.name}`} />
+              ))}
+            </div>
+          ) : (
+            <div className="analysis-empty-copy">
+              No additional explanatory factors were returned for this
+              assessment.
+            </div>
+          )}
+
+          <div className="form-message analysis-model-scope">
+            <strong>Current model scope</strong>
+            <p>
+              The live SentinelPay endpoint evaluates transaction and
+              contextual inputs. Audio, conversation text, and speech-model
+              signals do not contribute to this transaction score.
+            </p>
           </div>
         </section>
 
-        <aside className="detail-section">
-          <h3>Model and decision</h3>
+        <aside className="detail-section analysis-model-panel">
+          <div className="analysis-section-intro">
+            <span className="analysis-section-kicker">Decision details</span>
+            <h3>Model and decision</h3>
+            <p>
+              The technical details below record how this assessment was
+              produced.
+            </p>
+          </div>
+
           <dl className="metadata-list">
             <div>
               <dt>Risk score</dt>
-              <dd>{score}%</dd>
+              <dd>{score}/100</dd>
             </div>
             <div>
               <dt>Risk level</dt>
@@ -85,15 +157,23 @@ export function AnalysisResultView({ result }: { result: AnalysisResult }) {
               <dt>Inference latency</dt>
               <dd>{result.latency_ms.toFixed(2)} ms</dd>
             </div>
-            <div>
-              <dt>Event ID</dt>
-              <dd>{result.event_id}</dd>
-            </div>
-            <div>
-              <dt>Session ID</dt>
-              <dd>{result.session_id}</dd>
-            </div>
           </dl>
+
+          <details className="analysis-technical-details">
+            <summary>Technical identifiers</summary>
+
+            <dl className="metadata-list metadata-list-technical">
+              <div>
+                <dt>Event ID</dt>
+                <dd>{result.event_id}</dd>
+              </div>
+              <div>
+                <dt>Session ID</dt>
+                <dd>{result.session_id}</dd>
+              </div>
+            </dl>
+          </details>
+
           <Link className="button button-secondary" href={routes.riskEvents}>
             View recent events
           </Link>

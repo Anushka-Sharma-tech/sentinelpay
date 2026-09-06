@@ -9,7 +9,7 @@ export default function SignUpPage() {
   return (
     <AuthShell
       title="Create a profile"
-      description="Set up your analyst identity. Email verification is required only during first-time registration."
+      description="Create your SentinelPay analyst account with an email address and password."
     >
       <SignUpForm />
     </AuthShell>

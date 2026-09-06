@@ -20,7 +20,11 @@ function getSnapshot() {
     return true;
   }
 
-  return sessionStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed";
+  try {
+    return sessionStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed";
+  } catch {
+    return true;
+  }
 }
 
 function getServerSnapshot() {
@@ -39,7 +43,12 @@ export function IntroOverlay() {
   );
 
   function dismiss() {
-    sessionStorage.setItem(INTRO_STORAGE_KEY, "dismissed");
+    try {
+      sessionStorage.setItem(INTRO_STORAGE_KEY, "dismissed");
+    } catch {
+      // The native link still works if storage is unavailable.
+    }
+
     notify();
   }
 
@@ -57,7 +66,11 @@ export function IntroOverlay() {
       <div className="intro-grid" aria-hidden="true" />
 
       <div className="intro-content">
-        <Link href="/" className="intro-logo" onClick={dismiss}>
+        <Link
+          href="/"
+          className="intro-logo"
+          onClick={dismiss}
+        >
           SentinelPay
         </Link>
 
@@ -79,17 +92,17 @@ export function IntroOverlay() {
           resulting decision.
         </p>
 
-        <button
+        <Link
+          href="/"
           className="button intro-button"
-          type="button"
           onClick={dismiss}
         >
           <span>Enter SentinelPay</span>
-          <span aria-hidden="true">→</span>
-        </button>
+          <span aria-hidden="true">{"\u2192"}</span>
+        </Link>
 
         <p className="intro-footnote">
-          Transaction intelligence · Payment decisioning
+          Transaction intelligence {"\u00b7"} Payment decisioning
         </p>
       </div>
     </div>
