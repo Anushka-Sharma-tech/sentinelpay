@@ -1,46 +1,47 @@
-﻿"use client";
+﻿
+"use client";
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
 const INTRO_STORAGE_KEY = "sentinelpay-intro-dismissed";
-
-const listeners = new Set<() => void>();
+const INTRO_EVENT = "sentinelpay:intro-dismissed";
 
 function subscribe(listener: () => void) {
-  listeners.add(listener);
+  window.addEventListener(INTRO_EVENT, listener);
 
   return () => {
-    listeners.delete(listener);
+    window.removeEventListener(INTRO_EVENT, listener);
   };
-}
-
-function getSnapshot() {
-  if (typeof window === "undefined") {
-    return true;
-  }
-
-  return sessionStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed";
 }
 
 function getServerSnapshot() {
   return true;
 }
 
-function notify() {
-  listeners.forEach((listener) => listener());
+function getClientSnapshot() {
+  try {
+    return sessionStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed";
+  } catch {
+    return true;
+  }
 }
 
 export function IntroOverlay() {
   const visible = useSyncExternalStore(
     subscribe,
-    getSnapshot,
+    getClientSnapshot,
     getServerSnapshot,
   );
 
   function dismiss() {
-    sessionStorage.setItem(INTRO_STORAGE_KEY, "dismissed");
-    notify();
+    try {
+      sessionStorage.setItem(INTRO_STORAGE_KEY, "dismissed");
+    } catch {
+      // Continue if browser storage is unavailable.
+    }
+
+    window.dispatchEvent(new Event(INTRO_EVENT));
   }
 
   if (!visible) {
@@ -49,12 +50,15 @@ export function IntroOverlay() {
 
   return (
     <div
-      className="intro-overlay"
+      className="intro-overlay cinematic-bg"
       role="dialog"
       aria-modal="true"
       aria-label="SentinelPay introduction"
     >
+      <div className="intro-ambient" aria-hidden="true" />
       <div className="intro-grid" aria-hidden="true" />
+      <div className="intro-vignette" aria-hidden="true" />
+      <div className="intro-sheen" aria-hidden="true" />
 
       <div className="intro-content">
         <Link href="/" className="intro-logo" onClick={dismiss}>
@@ -76,7 +80,7 @@ export function IntroOverlay() {
         <p className="intro-copy">
           SentinelPay evaluates transaction and contextual signals,
           assigns a risk score, and gates payment based on the
-          resulting decision.
+          resulting decision policy.
         </p>
 
         <button
@@ -89,7 +93,7 @@ export function IntroOverlay() {
         </button>
 
         <p className="intro-footnote">
-          Transaction intelligence · Payment decisioning
+          Transaction intelligence &middot; Payment decisioning
         </p>
       </div>
     </div>

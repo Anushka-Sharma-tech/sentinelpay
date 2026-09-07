@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
   --ink: #070b12;
@@ -5094,5 +5094,366 @@ select:focus {
   .research-boundary-note > div + div {
     border-top: 1px solid var(--line);
     border-left: 0;
+  }
+}
+/* =========================================================
+   PHASE 7: INTRO OVERLAY FLASH FIX & CINEMATIC BACKGROUND
+   ========================================================= */
+
+/* 1. Flash Prevention Logic */
+html.intro-dismissed .intro-overlay {
+  display: none !important;
+}
+
+html.intro-active body {
+  overflow: hidden !important;
+}
+
+/* 2. Cinematic Background Styling */
+.intro-overlay.cinematic-bg {
+  /* Blend a dark tech/workspace image with your deep ink color */
+  background-image: 
+    linear-gradient(to bottom, rgba(7, 11, 18, 0.75), rgba(7, 11, 18, 0.98)),
+    url('https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+  
+  /* Ensure it sits above everything until dismissed */
+  z-index: 9999;
+}
+
+/* Enhancing the text contrast against the new background */
+.intro-overlay.cinematic-bg h1 {
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+}
+
+.intro-overlay.cinematic-bg .intro-logo,
+.intro-overlay.cinematic-bg .intro-kicker,
+.intro-overlay.cinematic-bg .intro-copy,
+.intro-overlay.cinematic-bg .intro-footnote {
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* Adding a subtle glow to the button to make it pop in the dark room */
+.intro-overlay.cinematic-bg .intro-button {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 15px 35px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  background: rgba(244, 240, 231, 0.08);
+}
+
+.intro-overlay.cinematic-bg .intro-button:hover {
+  box-shadow: 0 0 0 1px rgba(90, 214, 197, 0.4), 0 20px 40px rgba(0, 0, 0, 0.6);
+  background: rgba(90, 214, 197, 0.12);
+}
+/* =========================================================
+   PHASE 7: INTRO OVERLAY CINEMATIC BACKGROUND
+   ========================================================= */
+
+/* 1. Cinematic Workspace Background */
+.intro-overlay.cinematic-bg {
+  /* Blends a dark tech workspace image with your deep ink color */
+  background-color: var(--ink);
+  background-image: 
+    linear-gradient(to bottom, rgba(7, 11, 18, 0.55), rgba(7, 11, 18, 0.98)),
+    url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
+  z-index: 9999;
+}
+
+/* 2. Dynamic Glowing Orbs (mimicking monitor/city light reflections) */
+.ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  opacity: 0.45;
+  pointer-events: none;
+  animation: drift 10s infinite alternate ease-in-out;
+}
+
+.glow-1 {
+  width: 45vw;
+  height: 45vw;
+  top: -10%;
+  left: -10%;
+  background: rgba(143, 184, 255, 0.12); /* SentinelPay Signal Blue */
+}
+
+.glow-2 {
+  width: 35vw;
+  height: 35vw;
+  bottom: -10%;
+  right: -5%;
+  background: rgba(96, 165, 250, 0.08);
+  animation-delay: -5s;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(3%, 4%) scale(1.05); }
+}
+
+/* 3. Text contrast and premium drop shadows */
+.cinematic-content {
+  position: relative;
+  z-index: 10;
+}
+
+.cinematic-content h1 {
+  text-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.cinematic-content .intro-logo,
+.cinematic-content .intro-copy,
+.cinematic-content .intro-footnote {
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+  color: rgba(255, 255, 255, 0.85); /* Boosts readability against dark background */
+}
+
+.cinematic-content .intro-kicker {
+  color: var(--signal-strong);
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* 4. Premium Glass Button */
+.cinematic-button {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 15px 35px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  background: rgba(244, 240, 231, 0.05);
+  border-color: transparent;
+  color: var(--white);
+}
+
+.cinematic-button:hover {
+  box-shadow: 0 0 0 1px rgba(143, 184, 255, 0.4), 0 20px 40px rgba(0, 0, 0, 0.6);
+  background: rgba(143, 184, 255, 0.15);
+}
+
+.cinematic-button span:last-child {
+  color: var(--signal-strong);
+}
+
+/* =========================================================
+   PHASE 7 — CINEMATIC INTRO OVERLAY
+   ========================================================= */
+
+.intro-overlay.cinematic-bg {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  isolation: isolate;
+
+  background:
+    radial-gradient(
+      55% 70% at 8% 46%,
+      rgb(61 108 184 / 0.16),
+      transparent 78%
+    ),
+    radial-gradient(
+      42% 60% at 88% 18%,
+      rgb(108 86 182 / 0.13),
+      transparent 80%
+    ),
+    radial-gradient(
+      34% 44% at 78% 88%,
+      rgb(184 78 42 / 0.045),
+      transparent 82%
+    ),
+    linear-gradient(
+      118deg,
+      #020408 0%,
+      #070b12 48%,
+      #04070b 100%
+    );
+
+  color: var(--text);
+}
+
+/* Animated atmospheric light */
+.intro-overlay.cinematic-bg::before {
+  position: absolute;
+  z-index: -3;
+  inset: -25%;
+  content: "";
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      28% 34% at 14% 44%,
+      rgb(79 139 228 / 0.18),
+      transparent 78%
+    ),
+    radial-gradient(
+      24% 32% at 86% 22%,
+      rgb(117 93 205 / 0.14),
+      transparent 80%
+    ),
+    radial-gradient(
+      20% 27% at 74% 82%,
+      rgb(214 99 52 / 0.055),
+      transparent 82%
+    );
+
+  filter: blur(78px);
+  opacity: 0.92;
+  animation: introAmbientDrift 18s ease-in-out infinite alternate;
+}
+
+/* Soft cinematic light sweep */
+.intro-overlay.cinematic-bg::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      118deg,
+      transparent 20%,
+      rgb(164 196 242 / 0.025) 44%,
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 34%,
+      rgb(0 0 0 / 0.18) 72%,
+      rgb(0 0 0 / 0.52) 100%
+    );
+}
+
+/* Subtle architectural grid */
+.intro-grid {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  opacity: 0.07;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(
+      rgb(174 198 229 / 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgb(174 198 229 / 0.06) 1px,
+      transparent 1px
+    );
+
+  background-size: 90px 90px;
+
+  mask-image:
+    radial-gradient(
+      ellipse 72% 76% at center,
+      black 0%,
+      rgb(0 0 0 / 0.72) 46%,
+      transparent 100%
+    );
+}
+
+/* Preserve the existing composition and typography */
+.intro-content {
+  position: relative;
+  z-index: 5;
+}
+
+.intro-content::before {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(760px, 90vw);
+  height: min(420px, 60vh);
+  content: "";
+  pointer-events: none;
+
+  transform: translate(-50%, -50%);
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgb(117 157 219 / 0.035),
+      transparent 68%
+    );
+
+  border-radius: 50%;
+  filter: blur(24px);
+}
+
+/* Stronger cinematic text separation */
+.intro-content h1 {
+  text-shadow:
+    0 12px 42px rgb(0 0 0 / 0.88),
+    0 2px 12px rgb(0 0 0 / 0.55);
+}
+
+.intro-content .intro-logo,
+.intro-content .intro-copy,
+.intro-content .intro-footnote {
+  text-shadow: 0 4px 16px rgb(0 0 0 / 0.72);
+}
+
+.intro-content .intro-kicker {
+  color: var(--signal-strong);
+  text-shadow: 0 4px 14px rgb(0 0 0 / 0.75);
+}
+
+/* CTA remains compact and elegant */
+.intro-button {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 16px 40px rgb(0 0 0 / 0.32);
+
+  backdrop-filter: blur(18px);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.075),
+      rgb(255 255 255 / 0.025)
+    );
+}
+
+.intro-button:hover {
+  transform: translateY(-2px);
+}
+
+.intro-button:active {
+  transform: translateY(0);
+}
+
+/* Ambient movement */
+@keyframes introAmbientDrift {
+  0% {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+
+  100% {
+    transform: translate3d(2%, 1.5%, 0) scale(1.045);
+  }
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay.cinematic-bg::before {
+    animation: none;
   }
 }
