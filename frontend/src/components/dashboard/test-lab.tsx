@@ -93,7 +93,7 @@ export function TestLab() {
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full max-w-[1600px] mx-auto">
       
       {/* LEFT SIDEBAR: Presets */}
-      <aside className="xl:col-span-3 flex flex-col gap-6 sticky top-8">
+      <aside className="xl:col-span-3 flex flex-col gap-6 xl:sticky xl:top-8">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-sm font-mono uppercase tracking-widest text-slate-400">Simulation</h2>
           <Status level="DEMO">Test Env</Status>
