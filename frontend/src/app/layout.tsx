@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · SentinelPay",
   },
   description:
-    "Detect and investigate voice-assisted social-engineering payment fraud using multimodal AI risk scoring.",
+    "Transaction fraud-risk detection and payment defense using structured transaction context, machine-learning risk scoring, explicit decision policy, and payment gating.",
 };
 
 export default function RootLayout({
